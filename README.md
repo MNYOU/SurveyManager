@@ -1,2 +1,2 @@
-# SurweyManager
+# SurveyManager
 Сервис опросов сотрудников и пациентов
