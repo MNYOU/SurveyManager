@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using Domain.Entities.Base;
 using Domain.Enums;
 using Microsoft.AspNetCore.Identity;
 
@@ -16,7 +17,6 @@ public class User: Entity
     // {
         
     // }
-    public Guid Id { get; set; }
     public RolesEnum Role { get; set; }
     public string Login { get; set; }
     public string Email { get; set; }
