@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Entities.Base;
 using Microsoft.EntityFrameworkCore;
 
 namespace DomainServices.Repositories;
@@ -9,5 +10,6 @@ public interface IEntityRepository<TEntity>
     IUnitOfWork UnitOfWork { get; }
 
     DbSet<TEntity> Items { get; }
+    
     // IQueryable<TEntity> Items { get; }
 }

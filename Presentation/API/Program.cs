@@ -4,13 +4,13 @@ using Infrastructure.Services.DbInitializer;
 // TODO переделать структуру. что-то хранится тут, что-то там
 public class Program
 {
-    public async static Task Main(string[] args)
+    public static async Task  Main(string[] args)
     {
         var host = CreateHostBuilder(args).Build();
         await DatabaseInitialising(args, host);
         await host.RunAsync();
-        var builder = WebApplication.CreateBuilder(args);
-        var app = builder.Build();
+        // var builder = WebApplication.CreateBuilder(args);
+        // var app = builder.Build();
         
 // Add services to the container.
 
@@ -37,7 +37,7 @@ public class Program
         // app.Run();
     }
 
-    private static async Task DatabaseInitialising(string[] args, IHost host)
+    public static async Task DatabaseInitialising(string[] args, IHost host)
     {
         using (var scope = host.Services.CreateScope())
         {

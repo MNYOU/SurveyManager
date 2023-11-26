@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 using Persistence.Repositories;
 
@@ -27,6 +28,7 @@ public class Startup
     
     public void ConfigureServices(IServiceCollection services)
     {
+        // services.AddSingleton<IConfiguration>();
         services.AddInfrastructureServices(Configuration);
         services.AddHttpContextAccessor();
         
@@ -73,7 +75,10 @@ public class Startup
 
         // services.AddAutoMapper();
         // services.addmediatr
-        services.AddDbContext<DataContext>(opt => { });
+        services.AddDbContext<DataContext>(opt =>
+        {
+            // opt.Options.fi
+        });
         {
             // Identity
             // var builder = services.AddIdentityCore<User>(opt =>
