@@ -16,5 +16,9 @@ public class QuestionTypeConfiguration: IEntityTypeConfiguration<Question>
             .HasOne(e => e.Survey)
             .WithMany(e => e.Questions)
             .HasForeignKey(e => e.SurveyId);
+
+        builder
+            .Property(e => e.IsRequired)
+            .HasDefaultValue(true);
     }
 }
