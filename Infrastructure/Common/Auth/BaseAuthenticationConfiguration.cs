@@ -2,7 +2,6 @@
 
 namespace Infrastructure.Common.Auth;
 
-// TODO непонятно зачем
 public class BaseAuthenticationConfiguration: IAuthenticationConfiguration
 {
     public string Audience { get; init; }
