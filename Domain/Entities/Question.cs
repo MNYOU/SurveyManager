@@ -13,6 +13,8 @@ public class Question : Entity
 
     public QuestionType Type { get; set; }
 
+    public bool IsRequired { get; set; }
+
     public int SequenceNumber { get; set; }
 
     public ICollection<AnswerOption>? Options { get; set; }
