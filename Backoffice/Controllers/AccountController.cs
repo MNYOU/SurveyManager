@@ -4,7 +4,9 @@ using Application.Models.Requests.Account;
 using Application.Models.Responses;
 using Application.Models.Responses.Account;
 using Application.Services;
+using AutoMapper;
 using Domain.Entities;
+using Infrastructure.Common.Logging;
 using Infrastructure.Common.Result;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -16,18 +18,31 @@ namespace Backoffice.Controllers;
 public class AccountController: ApiBaseController
 {
     // TODO сделать другой интерфейс, наследующийся от этого
-    private IAccountService<User> _service;
+    private readonly IAccountService<User> _service;
     
-    public AccountController(IAccountService<User> service)
+    public AccountController(IAccountService<User> service, ICustomLogger logger, IMapper mapper): base(logger, mapper)
     {
         _service = service;
     }
     
+    [HttpGet]
+    [TranslateResultToActionResult]
+    [ProducesDefaultResponseType(typeof(Result))]
+    [ProducesResponseType(typeof(AuthorizedModel), 200)]
+    public async Task<Result<AuthorizedModel>> GetAccountInfo()
+    {
+        throw new NotImplementedException();
+        // var result = await _service.Login(request);
+        // if (result.)
+        // return result;
+    }
+    
     [AllowAnonymous]
     [HttpPost("login")]
+    [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
-    [ProducesResponseType(typeof(Result<AuthorizedModel>), 200)]
-    public async Task<Result<AuthorizedModel>> Login([FromBody] LoginModel request)
+    [ProducesResponseType(typeof(AuthorizedModel), 200)]
+    public async Task<Result<AuthorizedModel>> LoginAsync([FromBody] LoginModel request)
     {
         var result = await _service.Login(request);
         // if (result.)
@@ -36,16 +51,20 @@ public class AccountController: ApiBaseController
 
     [AllowAnonymous]
     [HttpPost("register")]
+    [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
-    public async Task<Result> Register([FromBody] RegistrationModel request)
+    public async Task<Result> RegisterAsync([FromBody] RegistrationModel request)
     {
         var result = await _service.Register(request);
         return result;
     }
 
     // TODO а как сделать совмество с фронтом
-    [HttpGet("{confirmationToken}")]
-    public async Task<Result> VerifyEmail([FromRoute] string confirmationToken, [FromQuery] Guid id)
+    [AllowAnonymous]
+    [HttpPost("{confirmationToken}")]
+    [TranslateResultToActionResult]
+    [ProducesDefaultResponseType(typeof(Result))]
+    public async Task<Result> VerifyEmailAsync([FromRoute] string confirmationToken, [FromQuery] Guid id)
     {
         var result = await _service.VerifyEmail(id, confirmationToken);
         return result;

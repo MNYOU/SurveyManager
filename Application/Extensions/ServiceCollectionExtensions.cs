@@ -21,6 +21,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAccountService<User>, AccountService>();
         services.AddScoped<ITokenProvider, TokenProvider>();
         services.AddScoped<IAuthenticationConfiguration, BaseAuthenticationConfiguration>();
+
+        services.AddScoped<ISurveyService, SurveyService>();
         // services.AddScoped<IMessageService, em>();
     }
 }

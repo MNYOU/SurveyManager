@@ -1,8 +1,9 @@
-﻿using Domain.Enums;
+﻿using System.Security.Claims;
+using Domain.Enums;
 
 namespace Application.Models.Responses.Account;
 
-public record AuthorizedModel
+public class AuthorizedModel
 {
     public Guid Id { get; init; }
 
@@ -13,4 +14,16 @@ public record AuthorizedModel
     public RolesEnum Role { get; init; }
     // TODO костыль
     public string Token { get; set; }
+
+    public static AuthorizedModel GetByClaimsWithoutToken(ClaimsPrincipal identity)
+    {
+        return new AuthorizedModel()
+        {
+            Id = new Guid(identity.Claims.Single(c => c.Type == "Id").Value),
+            Email = identity.Claims.Single(c => c.Type == ClaimTypes.Email).Value,
+            Login = identity.Claims.Single(c => c.Type == "Id").Value,
+            Role =  Enum.Parse<RolesEnum>(identity.Claims.Single(c => c.Type == ClaimTypes.Role).Value)
+        };
+    }
+    
 }
