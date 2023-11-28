@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
         {
             cfg.AddMaps(typeof(Email).Assembly);
         });
-
+        
         services.AddScoped<IAuthConfigBuilder, JwtAuthConfigBuilder>();
         
         services.AddSingleton<IMessageService, EmailService>();
