@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backoffice.Controllers;
 
-[Route("[controller]")]
+[Route("[controller]/")]
 public class SurveyController: ApiBaseController
 {
     private readonly ISurveyService _surveyService;
@@ -20,7 +20,7 @@ public class SurveyController: ApiBaseController
         _surveyService = surveyService;
     }
     
-    [HttpGet("/{surveyId:guid}")]
+    [HttpGet("{surveyId:guid}")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(SurveyView), 200)]
@@ -42,7 +42,7 @@ public class SurveyController: ApiBaseController
         return result;
     }
     
-    [HttpPut("/{surveyId:guid}")]
+    [HttpPut("{surveyId:guid}")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(SurveyView), 200)]
@@ -53,12 +53,13 @@ public class SurveyController: ApiBaseController
         return result;
     }
         
-    [HttpDelete("/{surveyId:guid}")]
+    [HttpDelete("{surveyId:guid}")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(SurveyView), 200)]
     public Result<SurveyView> Delete([FromRoute] Guid surveyId)
     {
+        var user = AuthorizedUser;
         var result = _surveyService.Delete(new DeleteSurveyRequest(AuthorizedUser.Id, surveyId));
 
         return result;
