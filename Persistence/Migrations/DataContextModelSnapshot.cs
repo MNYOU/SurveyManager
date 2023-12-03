@@ -23,6 +23,23 @@ namespace Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("Domain.Entities.Admin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccessKey")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessKey")
+                        .IsUnique();
+
+                    b.ToTable("Admins", "SurveyManager");
+                });
+
             modelBuilder.Entity("Domain.Entities.AnswerOption", b =>
                 {
                     b.Property<Guid>("Id")
@@ -74,7 +91,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("PatientAnswer", "SurveyManager");
+                    b.ToTable("PatientAnswers", "SurveyManager");
                 });
 
             modelBuilder.Entity("Domain.Entities.Question", b =>
@@ -82,6 +99,11 @@ namespace Persistence.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsRequired")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<int?>("MaxValue")
                         .HasColumnType("integer");
@@ -106,7 +128,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("SurveyId");
 
-                    b.ToTable("Question", "SurveyManager");
+                    b.ToTable("Questions", "SurveyManager");
                 });
 
             modelBuilder.Entity("Domain.Entities.Survey", b =>
@@ -132,7 +154,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("AdminId");
 
-                    b.ToTable("Survey", "SurveyManager");
+                    b.ToTable("Surveys", "SurveyManager");
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -246,13 +268,18 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Survey", b =>
                 {
-                    b.HasOne("Domain.Entities.User", "Admin")
-                        .WithMany()
+                    b.HasOne("Domain.Entities.Admin", "Admin")
+                        .WithMany("Surveys")
                         .HasForeignKey("AdminId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Admin");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Admin", b =>
+                {
+                    b.Navigation("Surveys");
                 });
 
             modelBuilder.Entity("Domain.Entities.PatientAnswer", b =>

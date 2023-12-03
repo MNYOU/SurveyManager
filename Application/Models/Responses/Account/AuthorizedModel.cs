@@ -21,7 +21,7 @@ public class AuthorizedModel
         {
             Id = new Guid(identity.Claims.Single(c => c.Type == "Id").Value),
             Email = identity.Claims.Single(c => c.Type == ClaimTypes.Email).Value,
-            Login = identity.Claims.Single(c => c.Type == "Id").Value,
+            Login = identity.Claims.Single(c => c.Type == "Login").Value,
             Role =  Enum.Parse<RolesEnum>(identity.Claims.Single(c => c.Type == ClaimTypes.Role).Value)
         };
     }

@@ -64,7 +64,7 @@ public class Program
         return Host.CreateDefaultBuilder(args)
             .ConfigureWebHostDefaults(webBuilder =>
             {
-                webBuilder.UseStaticWebAssets();
+                // webBuilder.UseStaticWebAssets();
                 webBuilder.ConfigureLogging(logBuilder =>
                 {
                     logBuilder.ClearProviders();
@@ -78,10 +78,6 @@ public class Program
                     options.Limits.MaxRequestHeadersTotalSize = 1048576;
                 });
                 webBuilder.UseStartup<Startup>();
-                // webBuilder.UseKestrel(options =>
-                //     {
-                //         options.Limits.MaxRequestHeadersTotalSize = 1048576;
-                //     });
             });
     }
 }

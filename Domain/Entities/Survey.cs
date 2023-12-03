@@ -20,7 +20,7 @@ public class Survey: Entity
 
     public Guid AdminId { get; set; }
 
-    public User Admin { get; set; }
+    public Admin Admin { get; set; }
     
     // public string Code { get; set; }
 }

@@ -6,7 +6,7 @@ using Infrastructure.Services.Auth;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Application.Services;
+namespace Application.Services.Account;
 
 public class TokenProvider : ITokenProvider
 {
@@ -29,7 +29,7 @@ public class TokenProvider : ITokenProvider
             _authConfig.Issuer,
             _authConfig.Audience,
             claims,
-            expires: DateTime.Now.Add(_authConfig.Lifetime),
+            expires: DateTime.UtcNow.Add(_authConfig.Lifetime),
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);

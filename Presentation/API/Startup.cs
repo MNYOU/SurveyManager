@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Net;
+using System.Reflection;
+using System.Text;
 using Application.Extensions;
 using Domain.Entities;
 using Infrastructure.Common.Email;
@@ -10,6 +12,9 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Persistence;
 using Persistence.Repositories;
 
@@ -28,6 +33,7 @@ public class Startup
     
     public void ConfigureServices(IServiceCollection services)
     {
+        // IdentityModelEventSource.ShowPII = true; что-то типо детальных логов ошибок
         // services.AddSingleton<IConfiguration>();
         services.AddInfrastructureServices(Configuration);
         services.AddHttpContextAccessor();
@@ -42,7 +48,32 @@ public class Startup
         // services.AddCustomSwagger(Configuration);
         services.AddEndpointsApiExplorer();
         services.AddControllers();
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(setup =>
+        {
+            // Include 'SecurityScheme' to use JWT Authentication
+            var jwtSecurityScheme = new OpenApiSecurityScheme
+            {
+                BearerFormat = "JWT",
+                Name = "JWT Authentication",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.Http,
+                Scheme = JwtBearerDefaults.AuthenticationScheme,
+                Description = "Put **_ONLY_** your JWT Bearer token on textbox below!",
+
+                Reference = new OpenApiReference
+                {
+                    Id = JwtBearerDefaults.AuthenticationScheme,
+                    Type = ReferenceType.SecurityScheme
+                }
+            };
+
+            setup.AddSecurityDefinition(jwtSecurityScheme.Reference.Id, jwtSecurityScheme);
+
+            setup.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                { jwtSecurityScheme, Array.Empty<string>() }
+            });
+        });
         services.AddCors(options =>
         {
             // this defines a CORS policy called "default"
@@ -51,18 +82,47 @@ public class Startup
                 policy
                     .AllowAnyHeader()
                     .AllowAnyMethod()
-                    .AllowCredentials();
+                    .AllowAnyOrigin();
+                // .AllowCredentials();
             });
         });
 
         
         // services.AddTaskTracking(Configuration);
 
-        // services.AddAuthorization(); // use asp.net identity
+        services.AddAuthorization(); // use asp.net identity
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            // .AddJwtBearer(options =>
             {
-                Configuration.Bind("JWTSettings", options);
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidAudience = "front-end",
+                    ValidIssuer = "https://localhost:7252",
+                    IssuerSigningKey = new SymmetricSecurityKey("r38s3aio1a21ags2bm4GhrF9"u8.ToArray())
+                };
+
+
+                // options.TokenValidationParameters = new TokenValidationParameters()
+                // {
+                // IssuerSigningKey = new SymmetricSecurityKey("r38s3aio1a2.1ags2bm4GhrF9"u8.ToArray()),
+                //         ValidateLifetime = true,
+                //         
+                // ValidateIssuer = true,
+                //         // строка, представляющая издателя
+                // ValidIssuer = "https://localhost:7252",
+                // будет ли валидироваться потребитель токена
+                // ValidateAudience = true,
+                // установка потребителя токена
+                // ValidAudience = "front-end",
+                //         // будет ли валидироваться время существования
+                //         // валидация ключа безопасности
+                //         ValidateIssuerSigningKey = true,
+                // };
+                // Configuration.Bind("Authentication:JWTSettings", options);
             });
         // services.AddCustomAuthentication(Configuration);
         // services.AddCustomAuthorization(Configuration);
@@ -104,6 +164,7 @@ public class Startup
 
         // services.AddScoped<SlugRouteValueTransformer>();
         // services.AddSingleton(services);
+        
         services.Configure<ApiBehaviorOptions>(options => options.SuppressInferBindingSourcesForParameters = true); // TODO to each module?
 
         services.AddRazorPages();
@@ -113,45 +174,37 @@ public class Startup
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IConfiguration configuration)
     {
+        app.UseHsts();
         app.UseHttpLogging();
         if (env.IsDevelopment())
         {
             app.UseSwagger();
             app.UseSwaggerUI();
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
         }
 
-        var basePath = configuration.GetValue<string>("BasePath");
-        if (!string.IsNullOrWhiteSpace(basePath))
-            app.UsePathBase(basePath);
+        //// var basePath = configuration.GetValue<string>("BasePath");
+        //// if (!string.IsNullOrWhiteSpace(basePath))
+        ////     app.UsePathBase(basePath);
 
         app.UseCors(Cors.Policy);
+        // app.UseStaticFiles();
         app.UseRouting();
 
-        app.UseForwardedHeaders(new ForwardedHeadersOptions
-        {
-            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-        });
+        // app.UseForwardedHeaders(new ForwardedHeadersOptions
+        // {
+        //     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+        // });
 
         app.UseAuthentication();
         app.UseAuthorization();
 
-        //app.UseMustChangePassword();
-
         app.UseResponseCaching();
 
-        app.UseStaticFiles();
-
         var moduleInitializers = app.ApplicationServices.GetServices<IModuleInitializer>();
-        // foreach (var moduleInitializer in moduleInitializers)
-            // moduleInitializer.ConfigureServices(app.se);
         app.UseEndpoints(endpoints =>
         {
-            // endpoints.MapGraphQL("/graphql");
-            endpoints.MapControllers()/*.RequireAuthorization()*/;
-            // endpoints.MapRazorPages();
-            // endpoints.MapBlazorHub();
-            // endpoints.MapFallbackToPage("/_Host");
+            endpoints.MapControllers();
         });
     }
 }

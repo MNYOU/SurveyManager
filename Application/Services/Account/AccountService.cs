@@ -1,8 +1,9 @@
-﻿using System.Security.Claims;
-using Application.Models.Requests.Account;
+﻿using Application.Models.Requests.Account;
 using Application.Models.Responses.Account;
+using Application.Services.AdditionalRegistator;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Enums;
 using DomainServices.Repositories;
 using Infrastructure.Common.Email;
 using Infrastructure.Common.Logging;
@@ -10,20 +11,23 @@ using Infrastructure.Common.Result;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Persistence.Repositories;
 
-namespace Application.Services;
+namespace Application.Services.Account;
 
-public class AccountService : IAccountService<User>
+public class AccountService : IAccountService
 {
     private readonly IMessageService _messageService;
     private readonly IUserRepository _repository;
     private readonly ITokenProvider _tokenProvider;
     private readonly IPasswordHasher<User> _hasher;
+    private readonly IAdditionalRegistrator[] _additionalRegistrators;
     private readonly AccountManager _accountManager;
     private readonly IMapper _mapper;
     private readonly ICustomLogger _logger;
+    private readonly Dictionary<RolesEnum, Func<User, Task<Result>>> _registratorByRole;
 
     // TODO где-то надо брать default site url, Company email
     public const string CompanyEmail = "example@mail.ru";
@@ -31,7 +35,7 @@ public class AccountService : IAccountService<User>
 
     public AccountService(IMessageService messageService, IMapper mapper,
         IUserRepository repository, ICustomLogger logger, ITokenProvider tokenProvider,
-        IPasswordHasher<User> hasher)
+        IPasswordHasher<User> hasher, IEnumerable<IAdditionalRegistrator> registrators)
     {
         _messageService = messageService;
         _mapper = mapper;
@@ -39,19 +43,20 @@ public class AccountService : IAccountService<User>
         _logger = logger;
         _tokenProvider = tokenProvider;
         _hasher = hasher;
+        _additionalRegistrators = registrators.ToArray();
     }
 
-    public async Task<User?> GetUserById(Guid id)
+    public async Task<User?> GetUserByIdAsync(Guid id)
     {
         return await _repository.Items.FirstOrDefaultAsync(e => e.Id == id);
     }
 
     public Task<List<User>> GetAll()
     {
-        return Task.Run(() => _repository.Items.ToList());
+        return _repository.Items.ToListAsync();
     }
 
-    public async Task<Result<AuthorizedModel?>> Login(LoginModel request)
+    public async Task<Result<AuthorizedModel>> Login(LoginModel request)
     {
         var user = await _repository.Items.FirstOrDefaultAsync(e => e.Login == request.Login);
         if (user != null)
@@ -67,10 +72,18 @@ public class AccountService : IAccountService<User>
 
         return Result.Unauthorized();
     }
+    
+    private void CanRegisterSuperUser(User user)
+    {
+        if (user.Role != RolesEnum.SuperAdmin) return;
+        if (user.Login.Contains("ArMaN.AdMiN"))
+            throw new ArgumentException($"Невозможно зарегистировать пользователя: {user.Login} с ролью: {user.Role}");
+    }
 
-    public async Task<Result> Register(RegistrationModel request)
+    public async Task<Result> RegisterAsync(RegistrationModel request)
     {
         var user = _mapper.Map<User>(request);
+        CanRegisterSuperUser(user);
         user.PasswordHash = _hasher.HashPassword(user, user.PasswordHash);
         await _repository.Items.AddAsync(user);
         try
@@ -84,10 +97,21 @@ public class AccountService : IAccountService<User>
             // throw;
         }
 
-        return Result.SuccessWithMessage("Требуется подтверждение почты. Проверьте ваш почтовый ящик.");
+        var additionalRegistator = _additionalRegistrators.FirstOrDefault(r => r.Role == user.Role);
+        if (additionalRegistator != null)
+        {
+            var otherResult = await additionalRegistator.Register(user);
+            if (otherResult.Failed)
+            {
+                _repository.Delete(user);
+                await _repository.UnitOfWork.SaveChangesAsync();
+            }
+        }
+
+        return Result.SuccessWithMessage("Регистрация прошла успешно, требуется подтверждение почты. Проверьте ваш почтовый ящик.");
     }
 
-    public async Task<Result> VerifyEmail(Guid id, string confirmationToken)
+    public async Task<Result> VerifyEmailAsync(Guid id, string confirmationToken)
     {
         throw new NotImplementedException();
     }

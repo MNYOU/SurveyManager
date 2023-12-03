@@ -19,6 +19,16 @@ public class PatientController: ApiBaseController
     {
         _surveyService = surveyService;
     }
+    
+    [AllowAnonymous]
+    [HttpGet("surveys/{key:guid}")]
+    [TranslateResultToActionResult]
+    [ProducesDefaultResponseType(typeof(Result))]
+    [ProducesResponseType(typeof(IEnumerable<SurveyPreview>), 200)]
+    public Result<IEnumerable<SurveyPreview>> GetAvailableSurveys([FromRoute] Guid key)
+    {
+        throw new NotImplementedException();
+    }
 
     [AllowAnonymous]
     [HttpGet("survey/{surveyId:guid}")]

@@ -1,8 +1,9 @@
-﻿namespace Domain.Entities;
+﻿using Domain.Entities.Base;
 
-public class Analyst
+namespace Domain.Entities;
+
+public class Analyst: Entity
 {
-    public Guid UserId { get; set; }
     
     
 }

@@ -1,41 +1,32 @@
-﻿using Application.Models.Responses.Admin;
-using Application.Services.Account;
-using Domain.Entities;
+﻿using Domain.Entities;
+using Domain.Enums;
 using DomainServices.Repositories;
 using Infrastructure.Common.Logging;
 using Infrastructure.Common.Result;
 using Microsoft.Extensions.Logging;
 
-namespace Application.Services;
+namespace Application.Services.AdditionalRegistator;
 
-public class AdminService: IAdminService
+public class AdminRegistrator: IAdditionalRegistrator
 {
     private readonly IAdminRepository _repository;
-    private readonly IAccountService _accountService;
     private readonly ICustomLogger _logger;
-    
-    public AdminService(IAdminRepository repository, IAccountService accountService, ICustomLogger logger)
+
+    public AdminRegistrator(IAdminRepository repository, ICustomLogger logger)
     {
         _repository = repository;
-        _accountService = accountService;
         _logger = logger;
     }
 
-    public async Task<Admin?> CheckAdminAsync(Guid id)
-    {
-        var user = await _accountService.GetUserByIdAsync(id);
-        if (user == null) return null;
-        var admin = await _repository.GetById(id);
-        return admin;
-    }
-
-    [Obsolete]
-    public async Task<Result> RegisterAdminAsync(User user)
+    public RolesEnum Role => RolesEnum.Admin;
+    
+    public async Task<Result> Register(User user)
     {
         var admin = await CheckAdminAsync(user.Id);
         if (admin != null) return Result.Error("Администратор с такими данными уже зарегистрирован.");
         admin = new Admin 
         {
+            Id = user.Id,
             AccessKey = Guid.NewGuid(),
         };
         await _repository.AddAsync(admin);
@@ -51,12 +42,12 @@ public class AdminService: IAdminService
 
         return Result.Success();
     }
-
-    public async Task<Result<AccessKey>> GetAccessCode(Guid adminId)
+    
+    private async Task<Admin?> CheckAdminAsync(Guid id)
     {
-        var admin = await CheckAdminAsync(adminId);
-        if (admin == null) return Result.Error("Администратор не найден.");
-
-        return Result.Success(new AccessKey(adminId, admin.AccessKey));
+        // var user = await _accountService.GetUserByIdAsync(id);
+        // if (user == null) return null;
+        var admin = await _repository.GetById(id);
+        return admin;
     }
 }

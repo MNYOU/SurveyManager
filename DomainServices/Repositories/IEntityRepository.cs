@@ -12,4 +12,14 @@ public interface IEntityRepository<TEntity>
     DbSet<TEntity> Items { get; }
     
     // IQueryable<TEntity> Items { get; }
+
+    public Task<List<TEntity>> GetAll();
+
+    public Task<TEntity?> GetById(Guid id);
+
+    public Task<TEntity> AddAsync(TEntity entity);
+
+    public TEntity Update(TEntity entity);
+
+    public void Delete(TEntity entity);
 }

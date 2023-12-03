@@ -4,6 +4,7 @@ using Application.Models.Requests.Account;
 using Application.Models.Responses;
 using Application.Models.Responses.Account;
 using Application.Services;
+using Application.Services.Account;
 using AutoMapper;
 using Domain.Entities;
 using Infrastructure.Common.Logging;
@@ -17,10 +18,9 @@ namespace Backoffice.Controllers;
 [Route("[controller]")]
 public class AccountController: ApiBaseController
 {
-    // TODO сделать другой интерфейс, наследующийся от этого
-    private readonly IAccountService<User> _service;
+    private readonly IAccountService _service;
     
-    public AccountController(IAccountService<User> service, ICustomLogger logger, IMapper mapper): base(logger, mapper)
+    public AccountController(IAccountService service, ICustomLogger logger, IMapper mapper): base(logger, mapper)
     {
         _service = service;
     }
@@ -29,13 +29,18 @@ public class AccountController: ApiBaseController
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(AuthorizedModel), 200)]
-    public async Task<Result<AuthorizedModel>> GetAccountInfo()
+    public Task<Result<AuthorizedModel>> GetAccountInfo()
     {
-        throw new NotImplementedException();
-        // var result = await _service.Login(request);
-        // if (result.)
-        // return result;
+        var info = new AuthorizedModel()
+        {
+            Id = AuthorizedUser.Id,
+            Email = AuthorizedUser.Email,
+            Login = AuthorizedUser.Login,
+            Role = AuthorizedUser.Role
+        };
+        return Task.FromResult<Result<AuthorizedModel>>(info);
     }
+    
     
     [AllowAnonymous]
     [HttpPost("login")]
@@ -49,13 +54,18 @@ public class AccountController: ApiBaseController
         return result;
     }
 
+    /// <summary>
+    /// Зарегистрировать пользователя
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [AllowAnonymous]
     [HttpPost("register")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     public async Task<Result> RegisterAsync([FromBody] RegistrationModel request)
     {
-        var result = await _service.Register(request);
+        var result = await _service.RegisterAsync(request);
         return result;
     }
 
@@ -66,7 +76,7 @@ public class AccountController: ApiBaseController
     [ProducesDefaultResponseType(typeof(Result))]
     public async Task<Result> VerifyEmailAsync([FromRoute] string confirmationToken, [FromQuery] Guid id)
     {
-        var result = await _service.VerifyEmail(id, confirmationToken);
+        var result = await _service.VerifyEmailAsync(id, confirmationToken);
         return result;
     }
 }

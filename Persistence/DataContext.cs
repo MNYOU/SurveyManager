@@ -18,6 +18,7 @@ public class DataContext : BaseContext
 
     public DbSet<AuditHistory> AuditHistories { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<Admin> Admins { get; set; }
     public DbSet<Survey> Surveys { get; set; }
     // public DbSet<BaseQuestion> Questions { get; set; }
     // public DbSet<BasePatientAnswer> PatientAnswers { get; set; }

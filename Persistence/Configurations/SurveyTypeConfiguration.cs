@@ -13,7 +13,7 @@ public class SurveyTypeConfiguration: IEntityTypeConfiguration<Survey>
 
         builder
             .HasOne(e => e.Admin)
-            .WithMany()
+            .WithMany(e => e.Surveys)
             .HasForeignKey(e => e.AdminId);
         
     }
