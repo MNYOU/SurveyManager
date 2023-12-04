@@ -12,9 +12,13 @@ public class SurveyTypeConfiguration: IEntityTypeConfiguration<Survey>
             .HasKey(e => e.Id);
 
         builder
+            .Property(e => e.ContainsDefaultQuestions)
+            .HasDefaultValue(true);
+        
+        builder
             .HasOne(e => e.Admin)
             .WithMany(e => e.Surveys)
-            .HasForeignKey(e => e.AdminId);
-        
+            .HasForeignKey(e => e.AdminId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

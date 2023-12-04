@@ -7,4 +7,6 @@ public record CreateSurveyRequest
     public string? Description { get; set; }
 
     public ICollection<CreateQuestionRequest> Questions { get; set; }
+    
+    // TODO добавить сюда Flag, добавлять ли дефолтные вопросы
 }

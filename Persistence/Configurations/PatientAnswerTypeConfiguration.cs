@@ -18,6 +18,6 @@ public class PatientAnswerTypeConfiguration : IEntityTypeConfiguration<PatientAn
 
         builder
             .HasMany(e => e.SelectedAnswerOptions)
-            .WithOne();
+            .WithMany();
     }
 }

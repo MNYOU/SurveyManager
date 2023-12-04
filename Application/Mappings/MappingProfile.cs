@@ -1,5 +1,7 @@
 ﻿using Application.Models.Requests.Account;
+using Application.Models.Requests.Survey;
 using Application.Models.Responses.Account;
+using Application.Models.Responses.Survey;
 using AutoMapper;
 using Domain.Entities;
 
@@ -15,5 +17,16 @@ public class MappingProfile : Profile
 
         CreateMap<User, AuthorizedModel>()
             .ForMember(d => d.Token, opt => opt.Ignore());
+
+        CreateMap<Survey, SurveyPreview>();
+        CreateMap<CreateSurveyRequest, Survey>();
+        CreateMap<Survey, SurveyView>();
+        
+        CreateMap<CreateQuestionRequest, Question>()
+            .ForMember(d => d.Options, opt => opt.MapFrom(s => s.AnswerOptions));
+        CreateMap<Question, QuestionView>();
+        
+        CreateMap<CreateAnswerOptionRequest, AnswerOption>();
+        CreateMap<AnswerOption, AnswerOptionView>();
     }
 }

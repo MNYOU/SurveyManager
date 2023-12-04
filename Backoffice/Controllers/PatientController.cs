@@ -25,9 +25,11 @@ public class PatientController: ApiBaseController
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(IEnumerable<SurveyPreview>), 200)]
-    public Result<IEnumerable<SurveyPreview>> GetAvailableSurveys([FromRoute] Guid key)
+    public async Task<Result<IEnumerable<SurveyPreview>>> GetAvailableSurveys([FromRoute] Guid key)
     {
-        throw new NotImplementedException();
+        var result = await _surveyService.GetSurveysPreviewForPass(key);
+
+        return result;
     }
 
     [AllowAnonymous]
@@ -35,9 +37,11 @@ public class PatientController: ApiBaseController
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(SurveyView), 200)]
-    public Result<SurveyView> GetSurveyForPass([FromRoute] Guid surveyId)
+    public async Task<Result<SurveyView>> GetSurveyForPass([FromRoute] Guid surveyId)
     {
-        throw new NotImplementedException();
+        var result = await _surveyService.GetSurveyForPass(surveyId);
+
+        return result;
     }
     
     [AllowAnonymous]
@@ -45,12 +49,10 @@ public class PatientController: ApiBaseController
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     // [ProducesResponseType(typeof(Result), 200)]
-    public Result UploadSurveyData([FromBody] SurveyRequest request)
+    public async Task<Result> UploadSurveyData([FromBody] SurveyRequest request)
     {
-        // var result = Result.Forbidden();
-        // if (result.Failed)
-            // ModelState.AddModelError(nameof(request.Id), "Опрос не найден");
-        // return result;
-        throw new NotImplementedException();
+        var result = await _surveyService.UploadSurveyPassData(request);
+
+        return result;
     }
 }

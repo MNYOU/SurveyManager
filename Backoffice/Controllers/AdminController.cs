@@ -6,6 +6,7 @@ using Domain.Enums;
 using Infrastructure.Common.Logging;
 using Infrastructure.Common.Result;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backoffice.Controllers;
@@ -27,9 +28,9 @@ public class AdminController: ApiBaseController
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(IEnumerable<SurveyPreview>), 200)]
-    public Result<IEnumerable<SurveyPreview>> Get()
+    public async Task<Result<IEnumerable<SurveyPreview>>> GetAsync()
     {
-        var result = _surveyService.GetSurveysPreviewByAdmin(AuthorizedUser.Id);
+        var result = await _surveyService.GetSurveysPreviewByAdmin(AuthorizedUser.Id);
 
         return result;
     }
@@ -59,7 +60,9 @@ public class AdminController: ApiBaseController
     [ProducesResponseType(typeof(LinkSurveys), 200)]
     public async Task<Result<LinkSurveys>> GetLinkForSurveys()
     {
-        throw new NotImplementedException();
+        var currentUrl = HttpContext.Request.GetEncodedUrl();
+        var newUrl = currentUrl.Split("/surveys/link")[0] + "/patient/surveys/" + AuthorizedUser.Id;
+        return new LinkSurveys(AuthorizedUser.Id, newUrl);
     }
     
     // [HttpDelete("/surveys/delete-all-accesses")]

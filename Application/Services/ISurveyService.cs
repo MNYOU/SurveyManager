@@ -12,9 +12,15 @@ public interface ISurveyService
 
     public Result Update(Guid adminId, Guid surveyId, CreateSurveyRequest request);
 
-    public Result Delete(DeleteSurveyRequest request);
+    public Task<Result> DeleteAsync(DeleteSurveyRequest request);
     
-    public Result<SurveyView> GetSurveyResult(Guid id);
+    public Task<Result<SurveyView>> GetSurveyAsync(Guid id, Guid userId);
+    
+    public Task<Result<IEnumerable<SurveyPreview>>> GetSurveysPreviewByAdmin(Guid adminId);
+    
+    public Task<Result<IEnumerable<SurveyPreview>>> GetSurveysPreviewForPass(Guid id);
+    
+    public Task<Result<SurveyView>> GetSurveyForPass(Guid id);
 
-    public Result<IEnumerable<SurveyPreview>> GetSurveysPreviewByAdmin(Guid adminId);
+    public Task<Result> UploadSurveyPassData(SurveyRequest request);
 }

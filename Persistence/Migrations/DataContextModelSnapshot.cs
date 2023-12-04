@@ -75,7 +75,6 @@ namespace Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PatientFIO")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("QuestionId")
@@ -100,6 +99,9 @@ namespace Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsRequired")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
@@ -111,10 +113,10 @@ namespace Persistence.Migrations
                     b.Property<int?>("MinValue")
                         .HasColumnType("integer");
 
-                    b.Property<int>("SequenceNumber")
+                    b.Property<int>("Number")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("SurveyId")
+                    b.Property<Guid?>("SurveyId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Title")
@@ -139,6 +141,11 @@ namespace Persistence.Migrations
 
                     b.Property<Guid>("AdminId")
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("ContainsDefaultQuestions")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
 
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp with time zone");
@@ -260,8 +267,7 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.Survey", "Survey")
                         .WithMany("Questions")
                         .HasForeignKey("SurveyId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Survey");
                 });

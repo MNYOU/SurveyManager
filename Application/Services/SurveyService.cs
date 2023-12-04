@@ -1,9 +1,15 @@
-﻿using Application.Models.Requests.Survey;
+﻿using Application.Common.Result.Validation;
+using Application.Models.Requests.Survey;
 using Application.Models.Responses.Survey;
 using Application.Services.Account;
+using AutoMapper;
+using Domain.Entities;
+using Domain.Enums;
 using DomainServices.Repositories;
 using Infrastructure.Common.Logging;
 using Infrastructure.Common.Result;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
 
@@ -12,25 +18,78 @@ public class SurveyService: ISurveyService
     private readonly ISurveyRepository _repository;
     private readonly IAccountService _accountService;
     private readonly ICustomLogger _logger;
+    private readonly IMapper _mapper;
 
-    public SurveyService(ISurveyRepository repository, IAccountService accountService, ICustomLogger logger)
+    public SurveyService(ISurveyRepository repository, IAccountService accountService, ICustomLogger logger, IMapper mapper)
     {
         _repository = repository;
         _accountService = accountService;
         _logger = logger;
+        _mapper = mapper;
+    }
+
+    private bool CheckAccess(Survey survey, Guid userId)
+    {
+        // TODO сейчас мы проверяем только админа, добавить проверку доступа аналитика
+        return survey.AdminId == userId;
+    }
+    
+    [Obsolete]
+    private async Task<Result<Survey>> GetSurvey(Guid id, Guid userId)
+    {
+        var survey = await _repository.Items.FirstOrDefaultAsync(e => e.Id == id);
+        if (survey == null) return Result.Error("Опрос не найден!");
+        if (!CheckAccess(survey, userId)) return Result.Forbidden();
+        return Result.Success(survey);
+    }
+
+    private bool IsValid(Survey survey)
+    {
+        return true;
+        // проверка, что у вопросов правильная последовательность
+        // throw new NotImplementedException();
+    }
+    
+    
+    public async Task<Result<SurveyView>> GetSurveyAsync(Guid id, Guid userId)
+    {
+        var survey = await _repository.Items
+            .Include(e => e.Questions)
+            .ThenInclude(e => e.Options)
+            .FirstOrDefaultAsync(e => e.Id == id);
+        if (survey == null) return Result.Error("Опрос не найден!");
+        if (!CheckAccess(survey, userId)) return Result.Forbidden();
+        
+        return Result.Success(_mapper.Map<SurveyView>(survey));
     }
 
     public async Task<Result> CreateAsync(Guid adminId, CreateSurveyRequest request)
     {
-        await AddDefaultQuestions(request);
-        throw new NotImplementedException();
-    }
-    
-    private async Task AddDefaultQuestions(CreateSurveyRequest request)
-    {
-        throw new NotImplementedException();
-        // TODO добавить 2 дефолтных вопроса
-        // + вопрос о ФИО
+        if (!await _accountService.CheckUserInRoleAsync(adminId, RolesEnum.Admin))
+            return Result.Forbidden();
+        
+        var survey = _mapper.Map<Survey>(request);
+        survey.AdminId = adminId;
+        survey.ContainsDefaultQuestions = true;
+        survey.CreationTime = DateTime.Now;
+        
+        if (survey.Questions.Any(q => q.IsDefault))
+            return Result.Forbidden();
+        if (!IsValid(survey))
+            return Result.Invalid(new List<ValidationError>()); // 0 ошибок?
+
+        await _repository.Items.AddAsync(survey);
+        try
+        {
+            await _repository.UnitOfWork.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.Log(LogLevel.Error, e.Message);
+            return Result.Error("Ошибка при загрузке опроса", e.Message);
+        }
+
+        return Result.Success();
     }
 
     public Result Update(Guid adminId, Guid surveyId, CreateSurveyRequest request)
@@ -38,17 +97,65 @@ public class SurveyService: ISurveyService
         throw new NotImplementedException();
     }
 
-    public Result Delete(DeleteSurveyRequest request)
+    public async Task<Result> DeleteAsync(DeleteSurveyRequest request)
     {
+        var survey = await _repository.Items.FirstOrDefaultAsync(e => e.Id == request.SurveyId);
+        if (survey == null) return Result.Error("Опрос не найден!");
+        if (!CheckAccess(survey, request.AdminId)) return Result.Forbidden();
+        
+        try
+        {
+            _repository.Delete(survey);
+            await _repository.UnitOfWork.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.Log(LogLevel.Error, e.Message);
+            return Result.Error("Ошибка при удалении опроса", e.Message);
+        }
+
+        return Result.Success();
+    }
+
+    public Task<Result<IEnumerable<SurveyPreview>>> GetSurveysPreviewByAdmin(Guid adminId)
+    {
+        var surveys = _repository.Items.Where(e => e.AdminId == adminId);
+
+        var data = surveys
+            .Select(x => _mapper.Map<SurveyPreview>(x))
+            .AsEnumerable();
+        return Task.FromResult(Result.Success(data));
+    }
+
+    public async Task<Result<IEnumerable<SurveyPreview>>> GetSurveysPreviewForPass(Guid id)
+    {
+        // TODO наверное переделать
+        return await GetSurveysPreviewByAdmin(id);
+    }
+
+    public async Task<Result<SurveyView>> GetSurveyForPass(Guid id)
+    {
+
+        // if ()
         throw new NotImplementedException();
     }
 
-    public Result<SurveyView> GetSurveyResult(Guid id)
+    private async Task<Survey?> GetSurveyWithDefaultQuestions(Guid id)
     {
-        throw new NotImplementedException();
+        var survey =await _repository.Items
+            .Include(e => e.Questions)
+            .ThenInclude(e => e.Options)
+            .FirstOrDefaultAsync(e => e.Id == id);
+        if (survey != null && survey.ContainsDefaultQuestions)
+        {
+            // TODO
+            // var defaultQuestions = questi
+        }
+
+        return survey;
     }
 
-    public Result<IEnumerable<SurveyPreview>> GetSurveysPreviewByAdmin(Guid adminId)
+    public async Task<Result> UploadSurveyPassData(SurveyRequest request)
     {
         throw new NotImplementedException();
     }

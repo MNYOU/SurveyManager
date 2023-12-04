@@ -8,13 +8,8 @@ public class Survey: Entity
 
     public string? Description { get; set; }
 
-    // public ICollection<Select> Selects { get; set; }
-
+    public bool ContainsDefaultQuestions { get; set; } = true;
     public ICollection<Question> Questions { get; set; }
-
-    // public ICollection<QuestionWithRangeAnswers> QuestionsWithRangeAnswers { get; set; }
-    
-    // public ICollection<QuestionWithTextAnswer> QuestionsWithTextAnswer { get; set; }
 
     public DateTime CreationTime { get; set; }
 

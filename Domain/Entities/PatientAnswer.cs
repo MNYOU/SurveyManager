@@ -10,7 +10,7 @@ public class PatientAnswer: Entity
     
     public DateTime Date { get; set; }
 
-    public string PatientFIO { get; set; }
+    public string? PatientFIO { get; set; }
     
     public ICollection<AnswerOption> SelectedAnswerOptions { get; set; }
     

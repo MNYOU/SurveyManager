@@ -3,6 +3,7 @@ using Application.Models.Responses.Account;
 using Application.Models.Responses.Survey;
 using Application.Services;
 using AutoMapper;
+using Domain.Enums;
 using Infrastructure.Common.Logging;
 using Infrastructure.Common.Result;
 using Microsoft.AspNetCore.Authorization;
@@ -24,14 +25,15 @@ public class SurveyController: ApiBaseController
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(SurveyView), 200)]
-    public Result<SurveyView> Get([FromRoute] Guid surveyId)
+    public async Task<Result<SurveyView>> GetAsync([FromRoute] Guid surveyId)
     {
-        var result = _surveyService.GetSurveyResult(surveyId);
+        var result = await _surveyService.GetSurveyAsync(surveyId, AuthorizedUser.Id);
 
         return result;
     }
     
     [HttpPost]
+    [Authorize(Roles = nameof(RolesEnum.Admin))]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(CreateSurveyRequest), 200)]
@@ -43,6 +45,7 @@ public class SurveyController: ApiBaseController
     }
     
     [HttpPut("{surveyId:guid}")]
+    [Authorize(Roles = nameof(RolesEnum.Admin))]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(SurveyView), 200)]
@@ -54,13 +57,13 @@ public class SurveyController: ApiBaseController
     }
         
     [HttpDelete("{surveyId:guid}")]
+    [Authorize(Roles = nameof(RolesEnum.Admin))]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(SurveyView), 200)]
-    public Result<SurveyView> Delete([FromRoute] Guid surveyId)
+    public async Task<Result<SurveyView>> DeleteAsync([FromRoute] Guid surveyId)
     {
-        var user = AuthorizedUser;
-        var result = _surveyService.Delete(new DeleteSurveyRequest(AuthorizedUser.Id, surveyId));
+        var result = await _surveyService.DeleteAsync(new DeleteSurveyRequest(AuthorizedUser.Id, surveyId));
 
         return result;
     }

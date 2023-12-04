@@ -15,7 +15,8 @@ public class QuestionTypeConfiguration: IEntityTypeConfiguration<Question>
         builder
             .HasOne(e => e.Survey)
             .WithMany(e => e.Questions)
-            .HasForeignKey(e => e.SurveyId);
+            .HasForeignKey(e => e.SurveyId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder
             .Property(e => e.IsRequired)

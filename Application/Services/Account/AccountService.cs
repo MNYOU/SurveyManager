@@ -116,6 +116,12 @@ public class AccountService : IAccountService
         throw new NotImplementedException();
     }
 
+    public async Task<bool> CheckUserInRoleAsync(Guid userId, RolesEnum role)
+    {
+        var user = await _repository.Items.FirstOrDefaultAsync(e => e.Id == userId);
+        return user != null && user.Role == role;
+    }
+
     public async Task<Result> RegisterIdentity(RegistrationModel request)
     {
         var user = _mapper.Map<User>(request);
