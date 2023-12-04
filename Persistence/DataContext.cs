@@ -14,6 +14,7 @@ public class DataContext : BaseContext
     public DataContext(DbContextOptions opt, IConfiguration config) : base(opt)
     {
         _config = config;
+        AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
     }
 
     public DbSet<AuditHistory> AuditHistories { get; set; }
@@ -38,7 +39,8 @@ public class DataContext : BaseContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        optionsBuilder.UseNpgsql(_config["ConnectionStrings:Postgresql"]);
+        // optionsBuilder.UseNpgsql(_config["ConnectionStrings:Postgresql"]);
+        optionsBuilder.UseNpgsql(_config["ConnectionStrings:PostgresqlUbuntu"]);
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
