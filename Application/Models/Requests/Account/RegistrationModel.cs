@@ -6,7 +6,7 @@ namespace Application.Models.Requests.Account;
 
 public record RegistrationModel
 {
-    [Required] [Login(6, 20)] public string Login { get; init; }
+    [Required] [Login] public string Login { get; init; }
 
     [Required] [EmailAddress] public string Email { get; init; }
 

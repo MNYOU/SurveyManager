@@ -79,4 +79,12 @@ public class AccountController: ApiBaseController
         var result = await _service.VerifyEmailAsync(id, confirmationToken);
         return result;
     }
+
+    [HttpDelete]
+    [TranslateResultToActionResult]
+    [ProducesDefaultResponseType(typeof(Result))]
+    public Task<Result> DeleteAccount()
+    {
+        throw new NotImplementedException();
+    }
 }

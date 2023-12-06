@@ -19,5 +19,10 @@ public class PatientAnswerTypeConfiguration : IEntityTypeConfiguration<PatientAn
         builder
             .HasMany(e => e.SelectedAnswerOptions)
             .WithMany();
+
+        builder
+            .HasOne(e => e.SurveyAnswer)
+            .WithMany()
+            .HasForeignKey(e => e.SurveyAnswerId);
     }
 }

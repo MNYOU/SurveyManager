@@ -24,7 +24,7 @@ public class AdminController: ApiBaseController
         _adminService = adminService;
     }
     
-    [HttpGet("/surveys")]
+    [HttpGet("surveys")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(IEnumerable<SurveyPreview>), 200)]
@@ -35,7 +35,7 @@ public class AdminController: ApiBaseController
         return result;
     }
     
-    [HttpGet("/surveys/access-key")]
+    [HttpGet("surveys/access-key")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(AccessKey), 200)]
@@ -46,7 +46,7 @@ public class AdminController: ApiBaseController
         return result;
     }
     
-    [HttpPut("/surveys/access-key")]
+    [HttpPut("surveys/access-key")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     public async Task<Result> UpdateAccessKeyAsync()
@@ -54,7 +54,7 @@ public class AdminController: ApiBaseController
         throw new NotImplementedException();
     }
     
-    [HttpGet("/surveys/link")]
+    [HttpGet("surveys/link")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(LinkSurveys), 200)]

@@ -28,5 +28,7 @@ public class MappingProfile : Profile
         
         CreateMap<CreateAnswerOptionRequest, AnswerOption>();
         CreateMap<AnswerOption, AnswerOptionView>();
+
+        CreateMap<SurveyRequest, PatientAnswer>();
     }
 }

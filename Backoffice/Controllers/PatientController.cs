@@ -45,7 +45,8 @@ public class PatientController: ApiBaseController
     }
     
     [AllowAnonymous]
-    [HttpPost("survey/{surveyId:guid}")]
+    // [HttpPost("survey/{surveyId:guid}")]
+    [HttpPost("survey/")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     // [ProducesResponseType(typeof(Result), 200)]

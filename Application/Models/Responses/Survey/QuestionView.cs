@@ -10,6 +10,8 @@ public class QuestionView
 
     public QuestionType Type { get; set; }
 
+    public int Number { get; set; }
+    
     public bool IsRequired { get; set; }
 
     public ICollection<AnswerOptionView> Options { get; set; }
