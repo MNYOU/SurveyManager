@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Persistence;
@@ -11,9 +12,11 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231206081752_Update_PatientAnswer")]
+    partial class UpdatePatientAnswer
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,13 +87,16 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<string>("PatientFIO")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uuid");
 
                     b.Property<int?>("RangeAnswer")
                         .HasColumnType("integer");
 
-                    b.Property<Guid>("SurveyAnswerId")
+                    b.Property<Guid?>("SurveyId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("TextAnswer")
@@ -100,25 +106,7 @@ namespace Persistence.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.HasIndex("SurveyAnswerId");
-
                     b.ToTable("PatientAnswers", "SurveyManager");
-                });
-
-            modelBuilder.Entity("Domain.Entities.PatientSurveyAnswer", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid?>("SurveyId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SurveyId");
-
-                    b.ToTable("PatientSurveyAnswer", "SurveyManager");
                 });
 
             modelBuilder.Entity("Domain.Entities.Question", b =>
@@ -298,24 +286,7 @@ namespace Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.PatientSurveyAnswer", "SurveyAnswer")
-                        .WithMany()
-                        .HasForeignKey("SurveyAnswerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Question");
-
-                    b.Navigation("SurveyAnswer");
-                });
-
-            modelBuilder.Entity("Domain.Entities.PatientSurveyAnswer", b =>
-                {
-                    b.HasOne("Domain.Entities.Survey", "Survey")
-                        .WithMany()
-                        .HasForeignKey("SurveyId");
-
-                    b.Navigation("Survey");
                 });
 
             modelBuilder.Entity("Domain.Entities.Question", b =>
