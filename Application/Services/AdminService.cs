@@ -4,6 +4,7 @@ using Domain.Entities;
 using DomainServices.Repositories;
 using Infrastructure.Common.Logging;
 using Infrastructure.Common.Result;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Application.Services;
@@ -27,6 +28,19 @@ public class AdminService: IAdminService
         if (user == null) return null;
         var admin = await _repository.GetById(id);
         return admin;
+    }
+
+    public async Task<Result> ChangeAccessKey(Guid id)
+    {
+        var user = await _accountService.GetUserByIdAsync(id);
+        throw new NotImplementedException();
+    }
+
+    public async Task<Admin?> FindByAccessKey(Guid key)
+    {
+        return await _repository.Items
+            .Include(e => e.Surveys)
+            .FirstOrDefaultAsync(e => e.AccessKey == key);
     }
 
     [Obsolete]

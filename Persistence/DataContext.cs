@@ -20,6 +20,7 @@ public class DataContext : BaseContext
     public DbSet<AuditHistory> AuditHistories { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<Admin> Admins { get; set; }
+    public DbSet<Analyst> Analysts { get; set; }
     public DbSet<Survey> Surveys { get; set; }
     // public DbSet<BaseQuestion> Questions { get; set; }
     // public DbSet<BasePatientAnswer> PatientAnswers { get; set; }
@@ -34,7 +35,8 @@ public class DataContext : BaseContext
     // public DbSet<PatientTextAnswer> TextAnswers { get; set; }
     // public DbSet<PatientRangeAnswer> RangeAnswers { get; set; }
     // public DbSet<PatientSelectAnswer> SelectAnswers { get; set; }
-
+    
+    public DbSet<AnalystAccess> AnalystAccess { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

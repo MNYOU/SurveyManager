@@ -31,6 +31,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAdminService, AdminService>();
         services.AddScoped<IAnalystService, AnalystService>();
         services.AddScoped<IAdditionalRegistrator, AdminRegistrator>();
+        services.AddScoped<IAdditionalRegistrator, AnalystRegistrator>();
         services.AddScoped<IQuestionService, QuestionService>();
     }
 }

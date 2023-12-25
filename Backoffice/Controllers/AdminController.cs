@@ -51,7 +51,9 @@ public class AdminController: ApiBaseController
     [ProducesDefaultResponseType(typeof(Result))]
     public async Task<Result> UpdateAccessKeyAsync()
     {
-        throw new NotImplementedException();
+        var result = await _adminService.ChangeAccessKey(AuthorizedUser.Id);
+
+        return result;
     }
     
     [HttpGet("surveys/link")]

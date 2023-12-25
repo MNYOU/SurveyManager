@@ -21,13 +21,13 @@ public class PatientController: ApiBaseController
     }
     
     [AllowAnonymous]
-    [HttpGet("surveys/{key:guid}")]
+    [HttpGet("surveys/")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(IEnumerable<SurveyPreview>), 200)]
-    public async Task<Result<IEnumerable<SurveyPreview>>> GetAvailableSurveys([FromRoute] Guid key)
+    public async Task<Result<IEnumerable<SurveyPreview>>> GetAvailableSurveys()
     {
-        var result = await _surveyService.GetSurveysPreviewForPass(key);
+        var result = await _surveyService.GetSurveysPreviewForPass();
 
         return result;
     }

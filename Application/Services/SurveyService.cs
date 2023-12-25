@@ -133,10 +133,12 @@ public class SurveyService: ISurveyService
         return Task.FromResult(Result.Success(data));
     }
 
-    public async Task<Result<IEnumerable<SurveyPreview>>> GetSurveysPreviewForPass(Guid id)
+    public async Task<Result<IEnumerable<SurveyPreview>>> GetSurveysPreviewForPass()
     {
         // TODO наверное переделать
-        return await GetSurveysPreviewByAdmin(id);
+        return Result.Success(_repository.Items
+            .Select(x => _mapper.Map<SurveyPreview>(x))
+            .AsEnumerable());
     }
 
     public async Task<Result<SurveyView>> GetSurveyForPass(Guid id)

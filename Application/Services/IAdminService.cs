@@ -12,5 +12,7 @@ public interface IAdminService
 
     public Task<Admin?> CheckAdminAsync(Guid id);
 
-    // public Result ChangeAccessKey { get; set; }
+    public Task<Result> ChangeAccessKey(Guid id);
+
+    public Task<Admin?> FindByAccessKey(Guid key);
 }

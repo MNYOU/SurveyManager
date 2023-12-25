@@ -22,7 +22,7 @@ public class PatientAnswerTypeConfiguration : IEntityTypeConfiguration<PatientAn
 
         builder
             .HasOne(e => e.SurveyAnswer)
-            .WithMany()
+            .WithMany(e => e.Answers)
             .HasForeignKey(e => e.SurveyAnswerId);
     }
 }

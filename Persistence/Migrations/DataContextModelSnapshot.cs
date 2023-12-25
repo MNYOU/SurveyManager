@@ -55,6 +55,36 @@ namespace Persistence.Migrations
                     b.ToTable("Admins", "SurveyManager");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Analyst", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Analysts", "SurveyManager");
+                });
+
+            modelBuilder.Entity("Domain.Entities.AnalystAccess", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccessKey")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnalystId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnalystId");
+
+                    b.ToTable("AnalystAccess", "SurveyManager");
+                });
+
             modelBuilder.Entity("Domain.Entities.AnswerOption", b =>
                 {
                     b.Property<Guid>("Id")
@@ -279,6 +309,17 @@ namespace Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Domain.Entities.AnalystAccess", b =>
+                {
+                    b.HasOne("Domain.Entities.Analyst", "Analyst")
+                        .WithMany("Accesses")
+                        .HasForeignKey("AnalystId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Analyst");
+                });
+
             modelBuilder.Entity("Domain.Entities.AnswerOption", b =>
                 {
                     b.HasOne("Domain.Entities.Question", "Question")
@@ -299,7 +340,7 @@ namespace Persistence.Migrations
                         .IsRequired();
 
                     b.HasOne("Domain.Entities.PatientSurveyAnswer", "SurveyAnswer")
-                        .WithMany()
+                        .WithMany("Answers")
                         .HasForeignKey("SurveyAnswerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -342,6 +383,16 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.Admin", b =>
                 {
                     b.Navigation("Surveys");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Analyst", b =>
+                {
+                    b.Navigation("Accesses");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PatientSurveyAnswer", b =>
+                {
+                    b.Navigation("Answers");
                 });
 
             modelBuilder.Entity("Domain.Entities.Question", b =>

@@ -18,7 +18,7 @@ public interface ISurveyService
     
     public Task<Result<IEnumerable<SurveyPreview>>> GetSurveysPreviewByAdmin(Guid adminId);
     
-    public Task<Result<IEnumerable<SurveyPreview>>> GetSurveysPreviewForPass(Guid id);
+    public Task<Result<IEnumerable<SurveyPreview>>> GetSurveysPreviewForPass();
     
     public Task<Result<SurveyView>> GetSurveyForPass(Guid id);
 

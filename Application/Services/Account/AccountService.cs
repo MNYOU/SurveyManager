@@ -72,13 +72,6 @@ public class AccountService : IAccountService
 
         return Result.Unauthorized();
     }
-    
-    private void CanRegisterSuperUser(User user)
-    {
-        if (user.Role != RolesEnum.SuperAdmin) return;
-        if (user.Login.Contains("ArMaN.AdMiN"))
-            throw new ArgumentException($"Невозможно зарегистировать пользователя: {user.Login} с ролью: {user.Role}");
-    }
 
     public async Task<Result> RegisterAsync(RegistrationModel request)
     {
@@ -140,6 +133,13 @@ public class AccountService : IAccountService
         }
 
         return Result.Error(result.Errors.Select(error => $"{error.Code}: {error.Description}").ToArray());
+    }
+    
+    private void CanRegisterSuperUser(User user)
+    {
+        if (user.Role != RolesEnum.SuperAdmin) return;
+        if (user.Login.Contains("ArMaN.AdMiN"))
+            throw new ArgumentException($"Невозможно зарегистировать пользователя: {user.Login} с ролью: {user.Role}");
     }
 
     private async Task<Result> VerifyEmailIdentity(Guid id, string confirmationToken)

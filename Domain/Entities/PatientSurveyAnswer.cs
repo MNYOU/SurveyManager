@@ -7,4 +7,6 @@ public class PatientSurveyAnswer: Entity
     public Guid? SurveyId { get; set; }
 
     public Survey? Survey { get; set; }
+
+    public ICollection<PatientAnswer> Answers { get; set; }
 }
