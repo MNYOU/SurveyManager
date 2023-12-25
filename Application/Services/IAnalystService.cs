@@ -1,8 +1,15 @@
-﻿using Infrastructure.Common.Result;
+﻿using Application.Models.Requests.Analyst;
+using Application.Models.Responses.Statistics;
+using Application.Models.Responses.Survey;
+using Infrastructure.Common.Result;
 
 namespace Application.Services;
 
 public interface IAnalystService
 {
-    public Task<Result> GetAvailableSurveys(Guid analystId);
+    public Task<Result<IEnumerable<SurveyPreview>>> GetAvailableSurveys(Guid analystId);
+
+    public Task<Result> AddAccessToSurveys(Guid userId, Guid key);
+
+    public Task<Result<SurveyStats>> GetSurveyStatsForAllAnswers(SurveyStatsFilters filters, Guid userId);
 }

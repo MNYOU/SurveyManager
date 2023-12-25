@@ -1,12 +1,12 @@
-﻿namespace Domain.Entities;
+﻿using Domain.Entities.Base;
 
-public class AnalystAccess
+namespace Domain.Entities;
+
+public class AnalystAccess: Entity
 {
     public Guid AnalystId { get; set; }
 
     public Analyst Analyst { get; set; }
 
-    public Guid AdminId { get; set; }
-
-    public Admin Admin { get; set; }
+    public Guid AccessKey { get; set; }
 }

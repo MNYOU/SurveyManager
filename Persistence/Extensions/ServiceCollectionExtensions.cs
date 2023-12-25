@@ -12,6 +12,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDbContextInitializer, DataContextInitializer>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAdminRepository, AdminRepository>();
+        services.AddScoped<IAnalystRepository, AnalystRepository>();
+        
         services.AddScoped<ISurveyRepository, SurveyRepository>();
         services.AddScoped<IQuestionRepository, QuestionRepository>();
 
