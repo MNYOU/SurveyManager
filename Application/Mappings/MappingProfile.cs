@@ -1,6 +1,7 @@
 ﻿using Application.Models.Requests.Account;
 using Application.Models.Requests.Survey;
 using Application.Models.Responses.Account;
+using Application.Models.Responses.Super;
 using Application.Models.Responses.Survey;
 using AutoMapper;
 using Domain.Entities;
@@ -30,5 +31,10 @@ public class MappingProfile : Profile
         CreateMap<AnswerOption, AnswerOptionView>();
 
         CreateMap<SurveyRequest, PatientAnswer>();
+
+        CreateMap<User, UserView>();
+
+        CreateMap<Survey, SuperSurveyView>()
+            .ForMember(d => d.Admin, opt => opt.Ignore());
     }
 }

@@ -2,6 +2,7 @@
 using Application.Services;
 using Application.Services.Account;
 using Application.Services.AdditionalRegistator;
+using Application.Services.Super;
 using Domain.Entities;
 using DomainServices.Repositories;
 using Infrastructure.Common.Auth;
@@ -33,5 +34,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IAdditionalRegistrator, AdminRegistrator>();
         services.AddScoped<IAdditionalRegistrator, AnalystRegistrator>();
         services.AddScoped<IQuestionService, QuestionService>();
+
+        services.AddScoped<ISuperAdminService, SuperAdminService>();
     }
 }
