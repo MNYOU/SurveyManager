@@ -14,7 +14,8 @@ public class AnalystAccessTypeConfiguration: IEntityTypeConfiguration<AnalystAcc
         builder
             .HasOne(e => e.Analyst)
             .WithMany(e => e.Accesses)
-            .HasForeignKey(e => e.AnalystId);
+            .HasForeignKey(e => e.AnalystId)
+            .OnDelete(DeleteBehavior.Cascade);
         
     }
 }

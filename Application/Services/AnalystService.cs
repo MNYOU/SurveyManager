@@ -140,9 +140,9 @@ public class AnalystService: IAnalystService
             var filtered = FilterAnswers(surveyAnswer.Answers);
             foreach (var answer in filtered)
             {
-                if (!d.ContainsKey(answer.QuestionId))
-                    d[answer.QuestionId] = new List<PatientAnswer>();
-                d[answer.QuestionId].Add(answer);
+                if (!d.ContainsKey(answer.QuestionId ?? Guid.Empty))
+                    d[answer.QuestionId ?? Guid.Empty] = new List<PatientAnswer>();
+                d[answer.QuestionId ?? Guid.Empty].Add(answer);
             }
         }
 
@@ -160,15 +160,15 @@ public class AnalystService: IAnalystService
         if (!answers.Any())
             return null;
 
-        var anyAnswers = answers[0];
+        var anyAnswer = answers[0];
         var stats = new QuestionStats()
         {
-            QuestionId = anyAnswers.QuestionId,
-            Question = _mapper.Map<QuestionView>(anyAnswers.Question),
+            QuestionId = anyAnswer.QuestionId ?? Guid.Empty,
+            Question = _mapper.Map<QuestionView>(anyAnswer.Question),
             AnswerStats = new List<AnswerOptionStats>(),
         };
 
-        if (anyAnswers.Question.Type is QuestionType.Once or QuestionType.Range)
+        if (anyAnswer.Question.Type is QuestionType.Once or QuestionType.Range)
         {
             var d = new Dictionary<Guid, int>();
             foreach (var answer in answers)
@@ -193,7 +193,7 @@ public class AnalystService: IAnalystService
                 stats.AnswerStats.Add(optionStats);
             }
         }
-        else if (anyAnswers.Question.Type is QuestionType.Range)
+        else if (anyAnswer.Question.Type is QuestionType.Range)
         {
             
         }
@@ -207,7 +207,7 @@ public class AnalystService: IAnalystService
         var filtered = new List<PatientAnswer>();
         foreach (var answer in answers)
         {
-            if (answer.Question.IsDefault)
+            if (!answer.QuestionId.HasValue ||  answer.Question.IsDefault)
                 continue;
             
             if (HasAnswer(answer))

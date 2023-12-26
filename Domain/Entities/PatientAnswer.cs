@@ -8,9 +8,9 @@ public class PatientAnswer: Entity
 
     public PatientSurveyAnswer SurveyAnswer { get; set; }
     
-    public Guid QuestionId { get; set; }
+    public Guid? QuestionId { get; set; }
 
-    public Question Question { get; set; }
+    public Question? Question { get; set; }
     
     public DateTime Date { get; set; }
     

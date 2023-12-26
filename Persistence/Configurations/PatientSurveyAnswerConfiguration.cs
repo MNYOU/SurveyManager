@@ -11,6 +11,7 @@ public class PatientSurveyAnswerConfiguration: IEntityTypeConfiguration<PatientS
         builder
             .HasOne(e => e.Survey)
             .WithMany()
-            .HasForeignKey(e => e.SurveyId);
+            .HasForeignKey(e => e.SurveyId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

@@ -14,7 +14,8 @@ public class PatientAnswerTypeConfiguration : IEntityTypeConfiguration<PatientAn
         builder
             .HasOne(e => e.Question)
             .WithMany()
-            .HasForeignKey(e => e.QuestionId);
+            .HasForeignKey(e => e.QuestionId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder
             .HasMany(e => e.SelectedAnswerOptions)
@@ -23,6 +24,7 @@ public class PatientAnswerTypeConfiguration : IEntityTypeConfiguration<PatientAn
         builder
             .HasOne(e => e.SurveyAnswer)
             .WithMany(e => e.Answers)
-            .HasForeignKey(e => e.SurveyAnswerId);
+            .HasForeignKey(e => e.SurveyAnswerId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

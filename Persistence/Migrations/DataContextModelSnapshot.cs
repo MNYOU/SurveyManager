@@ -114,7 +114,7 @@ namespace Persistence.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<Guid>("QuestionId")
+                    b.Property<Guid?>("QuestionId")
                         .HasColumnType("uuid");
 
                     b.Property<int?>("RangeAnswer")
@@ -325,7 +325,7 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.Question", "Question")
                         .WithMany("Options")
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
                     b.Navigation("Question");
@@ -336,8 +336,7 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.Question", "Question")
                         .WithMany()
                         .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Domain.Entities.PatientSurveyAnswer", "SurveyAnswer")
                         .WithMany("Answers")
@@ -354,7 +353,8 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Domain.Entities.Survey", "Survey")
                         .WithMany()
-                        .HasForeignKey("SurveyId");
+                        .HasForeignKey("SurveyId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Survey");
                 });
