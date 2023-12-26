@@ -19,4 +19,6 @@ public interface IAccountService
     public Task<Result> VerifyEmailAsync(Guid id, string confirmationToken);
 
     public Task<bool> CheckUserInRoleAsync(Guid userId, RolesEnum role);
+
+    public Task<Result> Delete(Guid id);
 }

@@ -83,8 +83,10 @@ public class AccountController: ApiBaseController
     [HttpDelete]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
-    public Task<Result> DeleteAccount()
+    public async Task<Result> DeleteAccount()
     {
-        throw new NotImplementedException();
+        var result = await _service.Delete(AuthorizedUser.Id);
+
+        return result;
     }
 }

@@ -32,8 +32,24 @@ public class AdminService: IAdminService
 
     public async Task<Result> ChangeAccessKey(Guid id)
     {
-        var user = await _accountService.GetUserByIdAsync(id);
-        throw new NotImplementedException();
+        var admin = await CheckAdminAsync(id);
+        if (admin is null)
+            return Result.Unauthorized();
+
+        admin.AccessKey = Guid.NewGuid();
+
+        _repository.Items.Update(admin);
+        try
+        {
+            await _repository.UnitOfWork.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.Log(LogLevel.Error, e);
+            return Result.Error("Ошибка при измении ключа доступа! ", e.Message);
+        }
+
+        return Result.Success();
     }
 
     public async Task<Admin?> FindByAccessKey(Guid key)

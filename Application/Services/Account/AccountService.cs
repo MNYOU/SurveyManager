@@ -115,6 +115,26 @@ public class AccountService : IAccountService
         return user != null && user.Role == role;
     }
 
+    public async Task<Result> Delete(Guid id)
+    {
+        var user = await _repository.Items.FirstOrDefaultAsync(e => e.Id == id);
+        if (user is null)
+            return Result.NotFound();
+
+        _repository.Items.Remove(user);
+        try
+        {
+            await _repository.UnitOfWork.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.Log(LogLevel.Error, e);
+            return Result.Error("Ошибка при удалении");
+        }
+
+        return Result.Success();
+    }
+
     public async Task<Result> RegisterIdentity(RegistrationModel request)
     {
         var user = _mapper.Map<User>(request);
@@ -138,7 +158,7 @@ public class AccountService : IAccountService
     private void CanRegisterSuperUser(User user)
     {
         if (user.Role != RolesEnum.SuperAdmin) return;
-        if (user.Login.Contains("ArMaN.AdMiN"))
+        if (!user.Login.Contains("ArMaN.AdMiN"))
             throw new ArgumentException($"Невозможно зарегистировать пользователя: {user.Login} с ролью: {user.Role}");
     }
 
