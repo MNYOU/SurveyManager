@@ -12,8 +12,7 @@ public class SurveyTypeConfiguration: IEntityTypeConfiguration<Survey>
             .HasKey(e => e.Id);
 
         builder
-            .Property(e => e.ContainsDefaultQuestions)
-            .HasDefaultValue(true);
+            .Property(e => e.ContainsDefaultQuestions);
         
         builder
             .HasOne(e => e.Admin)

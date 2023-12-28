@@ -1,5 +1,6 @@
 ﻿using Application.Models.Requests.Analyst;
 using Application.Models.Responses.Statistics;
+using Application.Models.Responses.Statistics.Average;
 using Application.Models.Responses.Survey;
 using Application.Services;
 using AutoMapper;
@@ -12,7 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Backoffice.Controllers;
 
 [Route("[controller]")]
-[Authorize(Roles = nameof(RolesEnum.Analyst))]
+[Authorize(Roles = $"{nameof(RolesEnum.Analyst)},{nameof(RolesEnum.Admin)}")]
 public class AnalystController:ApiBaseController
 {
     private IAnalystService _service;
@@ -31,19 +32,27 @@ public class AnalystController:ApiBaseController
         return _service.GetAvailableSurveys(AuthorizedUser.Id);
     }
 
-    [HttpGet("survey/")]
+    [HttpGet("survey/all")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
     [ProducesResponseType(typeof(SurveyStats), 200)]
-    public Task<Result<SurveyStats>> GetSurveyStats([FromQuery] SurveyStatsFilters filters)
+    public Task<Result<SurveyStats>> GetSurveyStatsAllAnswers([FromQuery] SurveyStatsFilters filters)
     {
         return _service.GetSurveyStatsForAllAnswers(filters, AuthorizedUser.Id);
+    }
+    
+    [HttpGet("survey/average")]
+    [TranslateResultToActionResult]
+    [ProducesDefaultResponseType(typeof(Result))]
+    [ProducesResponseType(typeof(SurveyStats), 200)]
+    public Task<Result<SurveyAverageStats>> GetSurveyAverageStats([FromQuery] SurveyStatsFilters filters)
+    {
+        return _service.GetSurveyAverageStats(filters, AuthorizedUser.Id);
     }
     
     [HttpPost("surveys/add")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
-    // [ProducesResponseType(typeof(SurveyVie>), 200)]
     public Task<Result> AddAccessToSurveys([FromQuery] Guid accessKey)
     {
         var result = _service.AddAccessToSurveys(AuthorizedUser.Id, accessKey);

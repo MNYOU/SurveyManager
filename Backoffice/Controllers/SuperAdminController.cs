@@ -1,4 +1,6 @@
-﻿using Application.Models.Responses.Super;
+﻿using Application.Models.Requests.Survey;
+using Application.Models.Responses.Super;
+using Application.Models.Responses.Survey;
 using Application.Services.Super;
 using AutoMapper;
 using Domain.Entities;
@@ -20,13 +22,34 @@ public class SuperAdminController: ApiBaseController
     {
         _service = service;
     }
+    
+    [HttpGet("question/default")]
+    [TranslateResultToActionResult]
+    [ProducesDefaultResponseType(typeof(Result))]
+    [ProducesResponseType(typeof(IEnumerable<QuestionView>), 200)]
+    public Result<IEnumerable<QuestionView>> GetAllDefaultQuestion()
+    {
+        return Result.Success(_service.GetAllDefaultQuestions(AuthorizedUser.Id));
+    }
 
     [HttpPost("question/default")]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
-    public Result CreateDefaultQuestion()
+    public Result CreateDefaultQuestion([FromBody] CreateQuestionRequest request)
     {
-        throw new NotImplementedException();
+        _service.AddDefaultQuestion(request, AuthorizedUser.Id);
+            
+        return Result.Success();
+    }
+    
+    [HttpDelete("question/default/{questionId:guid}")]
+    [TranslateResultToActionResult]
+    [ProducesDefaultResponseType(typeof(Result))]
+    public Result CreateDefaultQuestion([FromRoute] Guid questionId)
+    {
+        _service.DeleteDefaultQuestion(AuthorizedUser.Id, questionId);
+            
+        return Result.Success();
     }
     
     [HttpGet("user")]

@@ -195,16 +195,30 @@ public class SurveyService: ISurveyService
             switch (question.Type)
             {
                 case QuestionType.Once:
-                    if (questionRequest.SelectedOptions is { Count: 1 })
-                        patientAnswer.SelectedAnswerOptions = new List<AnswerOption>(question.Options.Select(x => question.Options.First(o => o.Id == x.Id)).Take(1));
-                    else if (question.IsRequired)
+                    if (questionRequest.SelectedOptions is not { Count: 1 })
                         return Result.Error();
+                    
+                    patientAnswer.SelectedAnswerOptions = new List<AnswerOption>();
+                    var option =
+                        question.Options.FirstOrDefault(e => questionRequest.SelectedOptions.Any(o => o.Id == e.Id));
+                    if (option is null && question.IsRequired)
+                        return Result.Error();
+
+                    if (option != null) 
+                        patientAnswer.SelectedAnswerOptions.Add(option);
                     break;
                 case QuestionType.Select:
-                    if (questionRequest.SelectedOptions != null && questionRequest.SelectedOptions.Any())
-                        patientAnswer.SelectedAnswerOptions = new List<AnswerOption>(questionRequest.SelectedOptions.Select(x => question.Options.First(o => o.Id == x.Id)));
-                    else if (question.IsRequired)
+                    if (questionRequest.SelectedOptions is null || !questionRequest.SelectedOptions.Any())
                         return Result.Error();
+                    
+                    patientAnswer.SelectedAnswerOptions = new List<AnswerOption>();
+                    var options =
+                        question.Options.Where(e => questionRequest.SelectedOptions.Any(o => o.Id == e.Id));
+                    if (!options.Any() && question.IsRequired)
+                        return Result.Error();
+                    
+                    foreach (var answerOption in options)
+                        patientAnswer.SelectedAnswerOptions.Add(answerOption);
                     break;
                 case QuestionType.Text:
                     if (questionRequest.TextAnswer != null)

@@ -19,7 +19,6 @@ public class QuestionTypeConfiguration: IEntityTypeConfiguration<Question>
             .OnDelete(DeleteBehavior.Cascade);
 
         builder
-            .Property(e => e.IsRequired)
-            .HasDefaultValue(true);
+            .Property(e => e.IsRequired);
     }
 }

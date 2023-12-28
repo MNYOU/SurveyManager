@@ -1,5 +1,9 @@
-﻿using Application.Models.Responses.Super;
+﻿using Application.Models.Requests.Survey;
+using Application.Models.Responses.Super;
+using Application.Models.Responses.Survey;
 using AutoMapper;
+using Domain.Entities;
+using Infrastructure.Common.Result;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Persistence;
@@ -78,5 +82,53 @@ public class SuperAdminService: ISuperAdminService
     public void ExecuteSql(Guid super, string sql)
     {
         throw new NotImplementedException();
+    }
+
+    public IEnumerable<QuestionView> GetAllDefaultQuestions(Guid super)
+    {
+        var questions = _context.Questions
+            .Include(e => e.Options)
+            .Where(e => e.IsDefault)
+            .Select(e => _mapper.Map<QuestionView>(e));
+
+        return questions;
+    }
+
+    public void AddDefaultQuestion(CreateQuestionRequest request, Guid super)
+    {
+        if (!CheckAccess(super))
+            throw new ArgumentException(nameof(super));
+
+        var question = _mapper.Map<Question>(request);
+        question.IsDefault = true;
+        _context.Questions.Add(question);
+        try
+        {
+            _context.SaveChanges();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Ошибка при сохранении вопроса");
+        }
+    }
+
+    public void DeleteDefaultQuestion(Guid super, Guid questionId)
+    {
+        if (!CheckAccess(super))
+            return;
+        
+        var question = _context.Questions.FirstOrDefault(e => e.Id == questionId);
+        if (question is null)
+            return;
+
+        _context.Questions.Remove(question);
+        try
+        {
+            _context.SaveChanges();
+        }
+        catch (Exception e)
+        {
+            throw new Exception("Ошибка при удалении вопроса");
+        }
     }
 }

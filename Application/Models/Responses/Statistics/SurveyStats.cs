@@ -1,10 +1,11 @@
-﻿using Application.Models.Responses.Survey;
+﻿using Application.Models.Responses.Statistics.AllAnswers;
+using Application.Models.Responses.Survey;
 
 namespace Application.Models.Responses.Statistics;
 
 public class SurveyStats
 {
-    public Guid SurveyId { get; set; }
+    // public Guid SurveyId { get; set; }
     
     public SurveyPreview Survey { get; set; }
 
