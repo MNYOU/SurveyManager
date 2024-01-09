@@ -16,7 +16,7 @@ namespace Backoffice.Controllers;
 [Authorize(Roles = $"{nameof(RolesEnum.Analyst)},{nameof(RolesEnum.Admin)}")]
 public class AnalystController:ApiBaseController
 {
-    private IAnalystService _service;
+    private readonly IAnalystService _service;
     
     public AnalystController(ICustomLogger logger, IMapper mapper, IAnalystService service) : base(logger, mapper)
     {
@@ -58,5 +58,15 @@ public class AnalystController:ApiBaseController
         var result = _service.AddAccessToSurveys(AuthorizedUser.Id, accessKey);
 
         return result;
+    }
+    
+    [AllowAnonymous]
+    [HttpGet("department")]
+    [TranslateResultToActionResult]
+    [ProducesDefaultResponseType(typeof(Result))]
+    [ProducesResponseType(typeof(IEnumerable<DepartmentView>), 200)]
+    public Task<Result<IEnumerable<DepartmentView>>> GetDepartments()
+    {
+        return _service.GetDepartments();
     }
 }

@@ -55,16 +55,23 @@ public class SurveyService: ISurveyService
         // проверка, что у вопросов правильная последовательность
         // throw new NotImplementedException();
     }
+
+    private Task<Survey?> GetSurveyAsync(Guid id)
+    {
+         return _repository.Items
+            .Include(e => e.Questions)
+            .ThenInclude(e => e.Options)
+            .FirstOrDefaultAsync(e => e.Id == id);
+    }
     
     
     public async Task<Result<SurveyView>> GetSurveyAsync(Guid id, Guid userId)
     {
-        var survey = await _repository.Items
-            .Include(e => e.Questions)
-            .ThenInclude(e => e.Options)
-            .FirstOrDefaultAsync(e => e.Id == id);
+        var survey = await GetSurveyAsync(id);
+        
         if (survey == null) return Result.Error("Опрос не найден!");
-        if (!CheckAccess(survey, userId)) return Result.Forbidden();
+        if (!CheckAccess(survey, userId)) 
+            return Result.Forbidden();
         
         return Result.Success(_mapper.Map<SurveyView>(survey));
     }
@@ -98,9 +105,20 @@ public class SurveyService: ISurveyService
         return Result.Success();
     }
 
-    public Result Update(Guid adminId, Guid surveyId, CreateSurveyRequest request)
+    public async Task<Result> Update(Guid adminId, Guid surveyId, CreateSurveyRequest request)
     {
-        throw new NotImplementedException();
+        var survey = await GetSurveyAsync(surveyId);
+
+        if (survey is null)
+            return Result.Invalid(new List<ValidationError>());
+        
+        if (!CheckAccess(survey, adminId))
+            return Result.Forbidden();
+
+        _repository.Items.Remove(survey);
+
+
+        return await CreateAsync(adminId, request);
     }
 
     public async Task<Result> DeleteAsync(DeleteSurveyRequest request)

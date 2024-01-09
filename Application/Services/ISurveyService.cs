@@ -10,7 +10,7 @@ public interface ISurveyService
 {
     public Task<Result> CreateAsync(Guid adminId, CreateSurveyRequest request);
 
-    public Result Update(Guid adminId, Guid surveyId, CreateSurveyRequest request);
+    public Task<Result> Update(Guid adminId, Guid surveyId, CreateSurveyRequest request);
 
     public Task<Result> DeleteAsync(DeleteSurveyRequest request);
     

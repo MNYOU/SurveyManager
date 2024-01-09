@@ -1,4 +1,4 @@
-﻿using System.Net.Mime;
+﻿using System.Collections;
 using Application.Common.Result.Validation;
 using Application.Models.Requests.Analyst;
 using Application.Models.Responses.Statistics;
@@ -23,6 +23,7 @@ public class AnalystService : IAnalystService
     private readonly IMapper _mapper;
     private readonly ICustomLogger _logger;
     private readonly IAdminService _adminService;
+    private IQuestionRepository _questionRepository;
     private readonly IAnalystRepository _repository;
     private readonly IAccountService _accountService;
     private readonly ISurveyRepository _surveyRepository;
@@ -31,7 +32,7 @@ public class AnalystService : IAnalystService
 
     public AnalystService(IMapper mapper, ICustomLogger logger, IPatientRepository patientRepository,
         IPatientSurveyRepository surveyAnswerRepository, IAnalystRepository repository, IAccountService accountService,
-        IAdminService adminService, ISurveyRepository surveyRepository)
+        IAdminService adminService, ISurveyRepository surveyRepository, IQuestionRepository questionRepository)
     {
         _mapper = mapper;
         _logger = logger;
@@ -41,6 +42,7 @@ public class AnalystService : IAnalystService
         _accountService = accountService;
         _adminService = adminService;
         _surveyRepository = surveyRepository;
+        _questionRepository = questionRepository;
     }
 
     private async Task<bool> CheckAccess(Guid userId, Guid surveyId)
@@ -147,44 +149,83 @@ public class AnalystService : IAnalystService
         return Result.Success();
     }
 
-    private IQueryable<PatientSurveyAnswer> GetAnswers(SurveyStatsFilters filters)
+    private IEnumerable<PatientSurveyAnswer> GetAnswers(SurveyStatsFilters filters, bool defaultQuestions)
     {
-        return _surveyAnswerRepository.Items
+        var surveyAnswers = _surveyAnswerRepository.Items
             .Include(e => e.Survey)
             .Include(e => e.Answers)
             .ThenInclude(e => e.Question)
             .Include(e => e.Answers)
             .ThenInclude(e => e.SelectedAnswerOptions)
             .ThenInclude(e => e.Question)
-            .Where(e => e.SurveyId == filters.SurveyId);
+            .Where(e => filters.SurveyId == null || e.SurveyId == filters.SurveyId)
+            .ToArray()
+            .Where(e => FilterByDepartment(e, filters));
+
+        foreach (var surveyAnswer in surveyAnswers)
+        {
+            surveyAnswer.Answers = surveyAnswer.Answers
+                .Where(e => e.Question != null && e.Question.IsDefault == defaultQuestions)
+                .ToList();
+        }
+        
+        return surveyAnswers;
     }
 
     public async Task<Result<SurveyStats>> GetSurveyStatsForAllAnswers(SurveyStatsFilters filters, Guid userId)
     {
-        var access = await CheckAccess(userId, filters.SurveyId);
-        if (!access)
+        IEnumerable<PatientSurveyAnswer> answers;
+        if (!filters.SurveyId.HasValue)
         {
-            _logger.Log(LogLevel.Information, $"Доступ не найден. id: {userId}");
-            return Result.Forbidden();
+            answers = GetAnswers(filters, true);
         }
+        else
+        {
+            var access = await CheckAccess(userId, filters.SurveyId.Value);
+            if (!access)
+            {
+                _logger.Log(LogLevel.Information, $"Доступ не найден. id: {userId}");
+                return Result.Forbidden();
+            }
 
-        var answers = GetAnswers(filters);
+            answers = GetAnswers(filters, false);
 
+        }
         return Result.Success(CalculateStatistics(answers, filters));
     }
 
     public async Task<Result<SurveyAverageStats>> GetSurveyAverageStats(SurveyStatsFilters filters, Guid userId)
     {
-        var access = await CheckAccess(userId, filters.SurveyId);
-        if (!access)
+        IEnumerable<PatientSurveyAnswer> answers;
+        if (!filters.SurveyId.HasValue)
         {
-            _logger.Log(LogLevel.Information, $"Доступ не найден. id: {userId}");
-            return Result.Forbidden();
+            answers = GetAnswers(filters, true);
         }
+        else
+        {
+            var access = await CheckAccess(userId, filters.SurveyId.Value);
+            if (!access)
+            {
+                _logger.Log(LogLevel.Information, $"Доступ не найден. id: {userId}");
+                return Result.Forbidden();
+            }
 
-        var answers = GetAnswers(filters);
+            answers = GetAnswers(filters, false);
 
+        }
         return Result.Success(CalculateAverageStatistics(answers, filters));
+    }
+
+    public async Task<Result<IEnumerable<DepartmentView>>> GetDepartments()
+    {
+        var question = await _questionRepository.Items
+            .Include(e => e.Options)
+            .FirstOrDefaultAsync(e => e.IsDefault && e.Title.Contains("Отделение"));
+        
+        if (question is null)
+            return new DepartmentView[0];
+
+        return Result.Success(question.Options.Select(e => new DepartmentView(e.Answer)));
     }
 
     private SurveyAverageStats CalculateAverageStatistics(IEnumerable<PatientSurveyAnswer> surveyAnswers, SurveyStatsFilters filters)
@@ -193,12 +234,14 @@ public class AnalystService : IAnalystService
             return null;
 
         var survey = surveyAnswers.First();
-        var stats = new SurveyAverageStats()
+        var stats = new SurveyAverageStats
         {
-            // SurveyId = survey.SurveyId.Value,
             Survey = _mapper.Map<SurveyPreview>(survey.Survey), // todo if null
             Questions = new List<QuestionAverageStats>(),
         };
+
+        if (filters.SurveyId is null)
+            stats.Survey = null;
 
         var questionAnswers = new Dictionary<Guid, List<PatientAnswer>>();
         foreach (var surveyAnswer in surveyAnswers)
@@ -295,12 +338,14 @@ public class AnalystService : IAnalystService
             return null;
 
         var survey = surveyAnswers.First();
-        var stats = new SurveyStats()
+        var stats = new SurveyStats
         {
-            // SurveyId = survey.SurveyId.Value,
             Survey = _mapper.Map<SurveyPreview>(survey.Survey),
             Questions = new List<QuestionStats>(),
         };
+        
+        if (filters.SurveyId is null)
+            stats.Survey = null;
 
         var d = new Dictionary<Guid, List<PatientAnswer>>();
         foreach (var surveyAnswer in surveyAnswers)
@@ -414,7 +459,7 @@ public class AnalystService : IAnalystService
         var filtered = new List<PatientAnswer>();
         foreach (var answer in answers)
         {
-            if (!answer.QuestionId.HasValue || answer.Question.IsDefault)
+            if (!answer.QuestionId.HasValue)
                 continue;
             
             if (!HasAnswer(answer))
@@ -432,7 +477,18 @@ public class AnalystService : IAnalystService
         return filtered;
     }
 
-    // public IEnumerable<>
+    private bool FilterByDepartment(PatientSurveyAnswer patientSurvey, SurveyStatsFilters filters)
+    {
+        if (filters.Department is null)
+            return true;
+            
+        var departmentAnswer = patientSurvey.Answers
+            .FirstOrDefault(e => e.Question is { IsDefault: true } && e.Question.Title.Contains("Отделение"));
+        if (departmentAnswer is null)
+            return true;
+
+        return departmentAnswer.SelectedAnswerOptions.Any(e => e.Answer.Contains(filters.Department));
+    }
 
     private bool HasAnswer(PatientAnswer answer)
     {

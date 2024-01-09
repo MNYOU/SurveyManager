@@ -15,4 +15,6 @@ public interface IAnalystService
     public Task<Result<SurveyStats>> GetSurveyStatsForAllAnswers(SurveyStatsFilters filters, Guid userId);
 
     public Task<Result<SurveyAverageStats>> GetSurveyAverageStats(SurveyStatsFilters filters, Guid userId);
+
+    public Task<Result<IEnumerable<DepartmentView>>> GetDepartments();
 }

@@ -1,5 +1,4 @@
 ﻿using Application.Models.Requests.Survey;
-using Application.Models.Responses.Account;
 using Application.Models.Responses.Survey;
 using Application.Services;
 using AutoMapper;
@@ -48,8 +47,7 @@ public class SurveyController: ApiBaseController
     [Authorize(Roles = nameof(RolesEnum.Admin))]
     [TranslateResultToActionResult]
     [ProducesDefaultResponseType(typeof(Result))]
-    [ProducesResponseType(typeof(SurveyView), 200)]
-    public Result<SurveyView> Update([FromRoute] Guid surveyId, [FromBody] CreateSurveyRequest request)
+    public Task<Result> Update([FromRoute] Guid surveyId, [FromBody] CreateSurveyRequest request)
     {
         var result = _surveyService.Update(AuthorizedUser.Id, surveyId, request);
 
