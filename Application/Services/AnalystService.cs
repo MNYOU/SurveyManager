@@ -465,6 +465,9 @@ public class AnalystService : IAnalystService
             if (!HasAnswer(answer))
                 continue;
             
+            if (answer.Question is { IsDefault: true } && answer.Question.Title == "ФИО")
+                continue;
+            
             var passDate = DateOnly.FromDateTime(answer.Date);
             if (filters.To.HasValue && passDate > filters.To)
                 continue;
