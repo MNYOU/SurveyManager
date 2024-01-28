@@ -225,6 +225,8 @@ public class AnalystService : IAnalystService
         if (question is null)
             return new DepartmentView[0];
 
+        question.Options.Add(new AnswerOption()
+            { Answer = "Стационар", QuestionId = question.Id, Question = question });
         return Result.Success(question.Options.Select(e => new DepartmentView(e.Answer)));
     }
 
@@ -494,7 +496,7 @@ public class AnalystService : IAnalystService
             return true;
         
         var departmentAnswer = patientSurvey.Answers
-            .FirstOrDefault(e => e.Question is { IsDefault: true } && e.Question.Title.Contains("Отделение"));
+            .FirstOrDefault(e => e.Question is { IsDefault: true } && e.Question.Title.ToLower().Contains("отделение"));
         if (departmentAnswer is null)
             return true;
 
