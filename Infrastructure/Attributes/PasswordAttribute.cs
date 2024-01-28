@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace Infrastructure.Attributes;
 
@@ -12,7 +13,7 @@ public class PasswordAttribute : StringValidateAttribute
     public PasswordAttribute(int minLength, int maxLength) : base("Пароль", minLength, maxLength)
     {
         NeedDigit = false;
-        ValidSpecialChars = "@#$%^&*,.?!-_";
+        ValidSpecialChars = "@#$%^&*,.?!-_()%";
     }
 
     public override bool NeedDigit { get; }
@@ -20,21 +21,26 @@ public class PasswordAttribute : StringValidateAttribute
 
     public override bool IsValid(object? value)
     {
-        if (!base.IsValid(value)) return false;
-        if (value is not string s) return false;
-
-        if (!s.Any(char.IsUpper))
-        {
-            ErrorMessage = "Пароль должен содержать хотя бы одну букву в верхнем регистре.";
+        if (value is not string password) 
             return false;
-        }
+        
+        var regex = new Regex("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$");
+        return regex.IsMatch(password);
 
-        if (!s.Any(char.IsLower))
-        {
-            ErrorMessage = "Пароль должен содержать хотя бы одну букву в нижнем регистре.";
-            return false;
-        }
-
-        return true;
+        // if (!base.IsValid(value)) return false;
+        //
+        // if (!s.Any(char.IsUpper))
+        // {
+        //     ErrorMessage = "Пароль должен содержать хотя бы одну букву в верхнем регистре.";
+        //     return false;
+        // }
+        //
+        // if (!s.Any(char.IsLower))
+        // {
+        //     ErrorMessage = "Пароль должен содержать хотя бы одну букву в нижнем регистре.";
+        //     return false;
+        // }
+        //
+        // return true;
     }
 }

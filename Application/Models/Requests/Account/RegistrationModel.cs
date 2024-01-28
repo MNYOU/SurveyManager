@@ -6,13 +6,20 @@ namespace Application.Models.Requests.Account;
 
 public record RegistrationModel
 {
-    [Required] [Login] public string Login { get; init; }
+    [Required] 
+    [Login] 
+    public string Login { get; init; }
 
-    [Required] [EmailAddress] public string Email { get; init; }
+    [Required] 
+    [EmailAddress] 
+    public string Email { get; init; }
 
-    [Required] public RolesEnum Role { get; init; }
+    [Required] 
+    public RolesEnum Role { get; init; }
 
-    [Required] [Password(12, 30)] public string Password { get; init; }
+    [Required]
+    [Password]
+    public string Password { get; init; }
 
     [Required]
     [Compare(nameof(Password), ErrorMessage = "Пароли должны совпадать")]

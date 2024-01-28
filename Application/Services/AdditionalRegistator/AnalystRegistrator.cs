@@ -41,7 +41,26 @@ public class AnalystRegistrator: IAdditionalRegistrator
 
         return Result.Success();
     }
-    
+
+    public async Task<Result> Delete(User user)
+    {
+        var analyst = await CheckAnalystAsync(user.Id);
+        if (analyst is null) 
+            return Result.Error("Администратор с такими данными уже зарегистрирован.");
+        try
+        {
+            _repository.Items.Remove(analyst);
+            await _repository.UnitOfWork.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.Log(LogLevel.Error ,"Ошибка при удалени админа. " + e.Message);
+            return Result.Error("Ошибка при удалени админа.");
+        }
+
+        return Result.Success();
+    }
+
     private async Task<Analyst?> CheckAnalystAsync(Guid id)
     {
         // var user = await _accountService.GetUserByIdAsync(id);

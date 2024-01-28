@@ -11,7 +11,6 @@ using Infrastructure.Common.Result;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Persistence.Repositories;
 
@@ -90,6 +89,7 @@ public class AccountService : IAccountService
             // throw;
         }
 
+        // TODO добавить провайдер
         var additionalRegistator = _additionalRegistrators.FirstOrDefault(r => r.Role == user.Role);
         if (additionalRegistator != null)
         {
@@ -101,7 +101,8 @@ public class AccountService : IAccountService
             }
         }
 
-        return Result.SuccessWithMessage("Регистрация прошла успешно, требуется подтверждение почты. Проверьте ваш почтовый ящик.");
+        return Result.SuccessWithMessage(
+            "Регистрация прошла успешно, требуется подтверждение почты. Проверьте ваш почтовый ящик.");
     }
 
     public async Task<Result> VerifyEmailAsync(Guid id, string confirmationToken)
@@ -117,13 +118,19 @@ public class AccountService : IAccountService
 
     public async Task<Result> Delete(Guid id)
     {
+        // todo удаление сущностей из других таблиц
         var user = await _repository.Items.FirstOrDefaultAsync(e => e.Id == id);
         if (user is null)
             return Result.NotFound();
 
+        // TODO удаление должно быть транзакцией
         _repository.Items.Remove(user);
         try
         {
+            // await _repository.UnitOfWork.SaveChangesAsync();
+            var additionalRegistator = _additionalRegistrators.FirstOrDefault(r => r.Role == user.Role);
+            if (additionalRegistator is not null)
+                await additionalRegistator.Delete(user);
             await _repository.UnitOfWork.SaveChangesAsync();
         }
         catch (Exception e)
@@ -154,7 +161,7 @@ public class AccountService : IAccountService
 
         return Result.Error(result.Errors.Select(error => $"{error.Code}: {error.Description}").ToArray());
     }
-    
+
     private void CanRegisterSuperUser(User user)
     {
         if (user.Role != RolesEnum.SuperAdmin) return;

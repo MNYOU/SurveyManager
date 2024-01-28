@@ -484,12 +484,25 @@ public class AnalystService : IAnalystService
     {
         if (filters.Department is null)
             return true;
-            
+
+        var departments = _questionRepository.Items
+            .Include(q => q.Options)
+            .Where(q => q.IsDefault)
+            .FirstOrDefault(q => q.Title.ToLower().Contains("отделение"))
+            ?.Options;
+        if (departments is null)
+            return true;
+        
         var departmentAnswer = patientSurvey.Answers
             .FirstOrDefault(e => e.Question is { IsDefault: true } && e.Question.Title.Contains("Отделение"));
         if (departmentAnswer is null)
             return true;
 
+        if (departmentAnswer.SelectedAnswerOptions.First().Answer.ToLower() is "стационар")
+        {
+            return departmentAnswer.SelectedAnswerOptions.Any(e => departments.Any(d => d.Answer == e.Answer));
+        }
+        
         return departmentAnswer.SelectedAnswerOptions.Any(e => e.Answer.Contains(filters.Department));
     }
 

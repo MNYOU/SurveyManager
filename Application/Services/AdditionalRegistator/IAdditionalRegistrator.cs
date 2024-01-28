@@ -10,4 +10,6 @@ public interface IAdditionalRegistrator
     public RolesEnum Role { get; }
 
     public Task<Result> Register(User user);
+    
+    public Task<Result> Delete(User user);
 }
